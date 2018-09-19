@@ -10,8 +10,8 @@ const APIs = [
 ];
 
 const config = {
-    //set public-key
-    keyProvider: ["public-key"],
+    //set private-key
+    keyProvider: ["private-key"],
     //set account name
     authorization: "account-name@active",
     httpEndpoint: "http://127.0.0.1:8888",
