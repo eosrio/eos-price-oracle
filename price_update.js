@@ -10,8 +10,10 @@ const APIs = [
 ];
 
 const config = {
-    keyProvider: ["5J27BDtbm2XBCTRW38Tj41tJmFtWAFGWE7hR8VKZ762CkUmy8eT"],
-    authorization: "price.update@active",
+    //set public-key
+    keyProvider: ["public-key"],
+    //set account name
+    authorization: "account-name@active",
     httpEndpoint: "http://127.0.0.1:8888",
     expireInSeconds: 60,
     broadcast: true,
@@ -25,7 +27,7 @@ const eos = eosjs(config);
 let contract;
 
 function main() {
-    //TODO: Verificar consistencia da blockchain
+    //TODO: Verify blockchain consistency 
     //eos.getInfo({}).then(r => console.log(r));
 
     eos.contract("price.update").then((data) => {
