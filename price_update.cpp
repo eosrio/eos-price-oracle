@@ -1,17 +1,24 @@
 #include <eosiolib/eosio.hpp>
+#include <eosiolib/name.hpp>
+#include <vector>
 
 using namespace eosio;
 using namespace std;
 
-class price_update : public contract {
+CONTRACT price_update : public eosio::contract {
     public:
-        price_update(account_name self) : contract(self) {}
+        using contract::contract;
+        price_update(name self, name code, datastream<const char*> ds) : contract(self, code, ds) {}
         
-        /// @abi action
+        [[eosio::action]]
         void createticker(name ticker_name, vector<string> exchanges) {
-            ticker_index tickers(_self, _self);
+            require_auth(_self);
 
-            auto itr = tickers.find(ticker_name);
+            ticker_index tickers(_self, _self.value);
+
+            uint64_t ticker_name_index = ticker_name.value;
+            auto itr = tickers.find(ticker_name_index);
+
             eosio_assert(itr == tickers.end(), "Ticker already exists!");
 
             tickers.emplace(_self, [&](auto& t) {
@@ -27,11 +34,15 @@ class price_update : public contract {
             });
         }
 
-        /// @abi action
+        [[eosio::action]]
         void updateticker(name ticker_name, vector<string> exchanges) {
-            ticker_index tickers(_self, _self);
+            require_auth(_self);
 
-            auto itr = tickers.find(ticker_name);
+            ticker_index tickers(_self, _self.value);
+
+            uint64_t ticker_name_index = ticker_name.value;
+            auto itr = tickers.find(ticker_name_index);
+
             eosio_assert(itr != tickers.end(), "Ticker not found!");
 
             tickers.modify(itr, _self, [&](auto& t) {
@@ -45,11 +56,15 @@ class price_update : public contract {
 
         }
 
-        /// @abi action
+        [[eosio::action]]
         void update(name ticker_name, vector<double> prices, double avg_price, string timestamp) {
-            ticker_index tickers(_self, _self);
+            require_auth(_self);
 
-            auto itr = tickers.find(ticker_name);
+            ticker_index tickers(_self, _self.value);
+
+            uint64_t ticker_name_index = ticker_name.value;
+            auto itr = tickers.find(ticker_name_index);
+
             eosio_assert(itr != tickers.end(), "Ticker not found!");
 
             eosio_assert(prices.size() <= itr->exchanges.size(), "Wrong values size");
@@ -70,17 +85,16 @@ class price_update : public contract {
             double exchange_price;
         };
 
-        /// @abi table
-        struct ticker {
+        TABLE ticker {
             name ticker_name;
             vector<exchange> exchanges;
             double avg_price;
             string timestamp;
 
-            auto primary_key() const {return ticker_name;}
+            uint64_t primary_key() const {return ticker_name.value;}
         };
 
-        typedef multi_index<N(ticker), ticker> ticker_index;
+        typedef multi_index<"ticker"_n, ticker> ticker_index;
 };
 
-EOSIO_ABI(price_update, (createticker)(updateticker)(update))
+EOSIO_DISPATCH(price_update, (createticker)(updateticker)(update))
