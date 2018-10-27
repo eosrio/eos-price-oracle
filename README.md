@@ -13,3 +13,26 @@ The smart contract has three actions:
 The contract is deployed on ***eosriooracle***.
 
 To access exchange rates, use ***get table eosriooracle eosriooracle ticker***.
+
+If you are developing a smart contract you'll need to include the following structure in your code in order to have access to the data:
+
+        struct exchange {
+            string exchange_name;
+            double exchange_price;
+        };
+
+        TABLE ticker {
+            name ticker_name;
+            vector<exchange> exchanges;
+            double avg_price;
+            string timestamp;
+
+            uint64_t primary_key() const {return ticker_name.value;}
+        };
+
+        typedef multi_index<"ticker"_n, ticker> ticker_index;
+
+And then, create an instance like this:
+
+        ticker_index tickers("eosriooracle"_n, "eosriooracle"_n.value);   
+
